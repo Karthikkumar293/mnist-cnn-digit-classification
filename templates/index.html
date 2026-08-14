@@ -2,7 +2,9 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>MNIST Digit Classifier</title>
@@ -23,9 +25,9 @@
         .container {
             width: 90%;
             max-width: 600px;
-            margin: 50px auto;
+            margin: 40px auto;
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
         }
@@ -40,11 +42,16 @@
 
         canvas {
             display: block;
+            width: 280px;
+            height: 280px;
+            max-width: 100%;
             margin: 25px auto;
             background: black;
             border: 3px solid #333;
             border-radius: 8px;
             cursor: crosshair;
+
+            /* Important for phone touch drawing */
             touch-action: none;
         }
 
@@ -73,7 +80,7 @@
 
         #result {
             margin-top: 25px;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
         }
 
@@ -96,13 +103,21 @@
 
         <p>Draw a handwritten digit from 0 to 9</p>
 
-        <canvas id="canvas" width="280" height="280"></canvas>
+        <canvas
+            id="canvas"
+            width="280"
+            height="280">
+        </canvas>
 
-        <button id="clearBtn" onclick="clearCanvas()">
+        <button
+            id="clearBtn"
+            onclick="clearCanvas()">
             Clear
         </button>
 
-        <button id="predictBtn" onclick="predictDigit()">
+        <button
+            id="predictBtn"
+            onclick="predictDigit()">
             Predict
         </button>
 
@@ -115,13 +130,20 @@
 
     <script>
 
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
+        // Get canvas
+        const canvas =
+            document.getElementById("canvas");
+
+        const ctx =
+            canvas.getContext("2d");
 
         let drawing = false;
 
 
-        // Create black background
+        // -------------------------
+        // Reset canvas
+        // -------------------------
+
         function resetCanvas() {
 
             ctx.fillStyle = "black";
@@ -132,149 +154,268 @@
                 canvas.width,
                 canvas.height
             );
-
         }
 
+
+        // Create black canvas
         resetCanvas();
 
 
+        // -------------------------
         // Drawing settings
+        // -------------------------
+
         ctx.strokeStyle = "white";
-        ctx.lineWidth = 20;
+
+        ctx.lineWidth = 25;
+
         ctx.lineCap = "round";
+
         ctx.lineJoin = "round";
 
 
+        // -------------------------
+        // Get correct position
+        // -------------------------
+
+        function getPosition(event) {
+
+            const rect =
+                canvas.getBoundingClientRect();
+
+            const scaleX =
+                canvas.width / rect.width;
+
+            const scaleY =
+                canvas.height / rect.height;
+
+            return {
+
+                x:
+                    (event.clientX - rect.left)
+                    * scaleX,
+
+                y:
+                    (event.clientY - rect.top)
+                    * scaleY
+            };
+        }
+
+
+        // -------------------------
         // Start drawing
-        canvas.addEventListener("mousedown", function(event) {
+        // Works on:
+        // Mouse
+        // Android
+        // iPhone
+        // -------------------------
 
-            drawing = true;
+        canvas.addEventListener(
+            "pointerdown",
+            function(event) {
 
-            ctx.beginPath();
+                event.preventDefault();
 
-            ctx.moveTo(
-                event.offsetX,
-                event.offsetY
-            );
+                drawing = true;
 
-        });
+                canvas.setPointerCapture(
+                    event.pointerId
+                );
 
+                const position =
+                    getPosition(event);
 
-        // Draw
-        canvas.addEventListener("mousemove", function(event) {
+                ctx.beginPath();
 
-            if (!drawing) {
-                return;
+                ctx.moveTo(
+                    position.x,
+                    position.y
+                );
             }
-
-            ctx.lineTo(
-                event.offsetX,
-                event.offsetY
-            );
-
-            ctx.stroke();
-
-        });
+        );
 
 
+        // -------------------------
+        // Draw
+        // -------------------------
+
+        canvas.addEventListener(
+            "pointermove",
+            function(event) {
+
+                event.preventDefault();
+
+                if (!drawing) {
+                    return;
+                }
+
+                const position =
+                    getPosition(event);
+
+                ctx.lineTo(
+                    position.x,
+                    position.y
+                );
+
+                ctx.stroke();
+            }
+        );
+
+
+        // -------------------------
         // Stop drawing
-        canvas.addEventListener("mouseup", function() {
+        // -------------------------
+
+        function stopDrawing(event) {
+
+            event.preventDefault();
 
             drawing = false;
 
             ctx.beginPath();
-
-        });
-
-
-        canvas.addEventListener("mouseleave", function() {
-
-            drawing = false;
-
-            ctx.beginPath();
-
-        });
+        }
 
 
-        // Clear canvas
+        canvas.addEventListener(
+            "pointerup",
+            stopDrawing
+        );
+
+
+        canvas.addEventListener(
+            "pointercancel",
+            stopDrawing
+        );
+
+
+        canvas.addEventListener(
+            "pointerleave",
+            stopDrawing
+        );
+
+
+        // -------------------------
+        // Clear button
+        // -------------------------
+
         function clearCanvas() {
 
             resetCanvas();
 
-            document.getElementById("result").innerHTML = "";
+            document.getElementById(
+                "result"
+            ).innerHTML = "";
 
-            document.getElementById("confidence").innerHTML = "";
-
+            document.getElementById(
+                "confidence"
+            ).innerHTML = "";
         }
 
 
+        // -------------------------
         // Predict digit
+        // -------------------------
+
         async function predictDigit() {
 
-            const resultElement = document.getElementById("result");
-            const confidenceElement = document.getElementById("confidence");
+            const result =
+                document.getElementById(
+                    "result"
+                );
 
-            resultElement.innerHTML = "Predicting...";
-            confidenceElement.innerHTML = "";
+            const confidence =
+                document.getElementById(
+                    "confidence"
+                );
 
 
-            // Convert canvas to PNG
-            const image = canvas.toDataURL("image/png");
+            result.innerHTML =
+                "Predicting...";
+
+            confidence.innerHTML = "";
+
+
+            // Convert drawing to image
+            const image =
+                canvas.toDataURL(
+                    "image/png"
+                );
 
 
             try {
 
-                const response = await fetch("/predict", {
+                // Send image to Flask
+                const response =
+                    await fetch(
+                        "/predict",
+                        {
+                            method: "POST",
 
-                    method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        image: image
-                    })
-
-                });
+                            body: JSON.stringify({
+                                image: image
+                            })
+                        }
+                    );
 
 
-                // Check whether Flask returned an error
+                // Check server response
                 if (!response.ok) {
 
                     throw new Error(
-                        "Server returned error: " + response.status
+                        "Server error: " +
+                        response.status
                     );
-
                 }
 
 
-                const result = await response.json();
+                // Convert response to JSON
+                const data =
+                    await response.json();
+
+
+                // Check backend error
+                if (data.error) {
+
+                    throw new Error(
+                        data.error
+                    );
+                }
 
 
                 // Display prediction
-                resultElement.innerHTML =
-                    "Predicted Digit: " + result.digit;
+                result.innerHTML =
+                    "Predicted Digit: " +
+                    data.digit;
 
 
-                confidenceElement.innerHTML =
-                    "Confidence: " + result.confidence + "%";
-
+                // Display confidence
+                confidence.innerHTML =
+                    "Confidence: " +
+                    data.confidence +
+                    "%";
 
             }
 
             catch (error) {
 
-                resultElement.innerHTML =
-                    "Prediction failed.";
+                console.error(
+                    "Prediction error:",
+                    error
+                );
 
-                confidenceElement.innerHTML =
-                    "Please try again.";
 
-                console.error("Prediction error:", error);
+                result.innerHTML =
+                    "Prediction failed";
 
+
+                confidence.innerHTML =
+                    error.message;
             }
-
         }
 
     </script>
