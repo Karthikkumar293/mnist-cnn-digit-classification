@@ -5,7 +5,7 @@ from PIL import Image
 import io
 import base64
 
-app = Flask(__name__, template_folder=".")
+app = Flask(__name__)
 
 
 # Load the trained CNN model
