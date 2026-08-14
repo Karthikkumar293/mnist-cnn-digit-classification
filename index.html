@@ -1,1 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MNIST Digit Classifier</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            text-align: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+        }
+
+        canvas {
+            display: block;
+            margin: 25px auto;
+            background: black;
+            border: 3px solid #333;
+            border-radius: 8px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        button {
+            padding: 12px 25px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #predictBtn {
+            background: #222;
+            color: white;
+        }
+
+        #clearBtn {
+            background: #ddd;
+            color: black;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        #result {
+            margin-top: 25px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        #confidence {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #555;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <h1>MNIST Digit Classifier</h1>
+
+        <p>Draw a handwritten digit from 0 to 9</p>
+
+        <canvas id="canvas" width="280" height="280"></canvas>
+
+        <button id="clearBtn" onclick="clearCanvas()">
+            Clear
+        </button>
+
+        <button id="predictBtn" onclick="predictDigit()">
+            Predict
+        </button>
+
+        <div id="result"></div>
+
+        <div id="confidence"></div>
+
+    </div>
+
+
+    <script>
+
+        const canvas = document.getElementById("canvas");
+
+        const ctx = canvas.getContext("2d");
+
+        let drawing = false;
+
+
+        // Create black background
+        ctx.fillStyle = "black";
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+        // Drawing settings
+        ctx.strokeStyle = "white";
+
+        ctx.lineWidth = 20;
+
+        ctx.lineCap = "round";
+
+        ctx.lineJoin = "round";
+
+
+        // Start drawing
+        canvas.addEventListener("mousedown", startDrawing);
+
+        // Draw
+        canvas.addEventListener("mousemove", draw);
+
+        // Stop drawing
+        canvas.addEventListener("mouseup", stopDrawing);
+
+        canvas.addEventListener("mouseleave", stopDrawing);
+
+
+        function startDrawing(event) {
+
+            drawing = true;
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                event.offsetX,
+                event.offsetY
+            );
+        }
+
+
+        function draw(event) {
+
+            if (!drawing) {
+                return;
+            }
+
+            ctx.lineTo(
+                event.offsetX,
+                event.offsetY
+            );
+
+            ctx.stroke();
+        }
+
+
+        function stopDrawing() {
+
+            drawing = false;
+
+            ctx.beginPath();
+        }
+
+
+        // Clear canvas
+        function clearCanvas() {
+
+            ctx.fillStyle = "black";
+
+            ctx.fillRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            document.getElementById("result").innerHTML = "";
+
+            document.getElementById("confidence").innerHTML = "";
+        }
+
+
+        // Send drawing to Flask
+        async function predictDigit() {
+
+            const image = canvas.toDataURL("image/png");
+
+
+            try {
+
+                const response = await fetch("/predict", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        image: image
+                    })
+
+                });
+
+
+                const result = await response.json();
+
+
+                document.getElementById("result").innerHTML =
+                    "Predicted Digit: " + result.digit;
+
+
+                document.getElementById("confidence").innerHTML =
+                    "Confidence: " + result.confidence + "%";
+
+            }
+
+            catch (error) {
+
+                document.getElementById("result").innerHTML =
+                    "Error connecting to server.";
+
+                console.error(error);
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
