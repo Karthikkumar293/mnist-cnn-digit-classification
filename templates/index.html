@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>MNIST Digit Classifier</title>
@@ -117,46 +116,37 @@
     <script>
 
         const canvas = document.getElementById("canvas");
-
         const ctx = canvas.getContext("2d");
 
         let drawing = false;
 
 
         // Create black background
-        ctx.fillStyle = "black";
+        function resetCanvas() {
 
-        ctx.fillRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
+            ctx.fillStyle = "black";
+
+            ctx.fillRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+        }
+
+        resetCanvas();
 
 
         // Drawing settings
         ctx.strokeStyle = "white";
-
         ctx.lineWidth = 20;
-
         ctx.lineCap = "round";
-
         ctx.lineJoin = "round";
 
 
         // Start drawing
-        canvas.addEventListener("mousedown", startDrawing);
-
-        // Draw
-        canvas.addEventListener("mousemove", draw);
-
-        // Stop drawing
-        canvas.addEventListener("mouseup", stopDrawing);
-
-        canvas.addEventListener("mouseleave", stopDrawing);
-
-
-        function startDrawing(event) {
+        canvas.addEventListener("mousedown", function(event) {
 
             drawing = true;
 
@@ -166,10 +156,12 @@
                 event.offsetX,
                 event.offsetY
             );
-        }
+
+        });
 
 
-        function draw(event) {
+        // Draw
+        canvas.addEventListener("mousemove", function(event) {
 
             if (!drawing) {
                 return;
@@ -181,38 +173,52 @@
             );
 
             ctx.stroke();
-        }
+
+        });
 
 
-        function stopDrawing() {
+        // Stop drawing
+        canvas.addEventListener("mouseup", function() {
 
             drawing = false;
 
             ctx.beginPath();
-        }
+
+        });
+
+
+        canvas.addEventListener("mouseleave", function() {
+
+            drawing = false;
+
+            ctx.beginPath();
+
+        });
 
 
         // Clear canvas
         function clearCanvas() {
 
-            ctx.fillStyle = "black";
-
-            ctx.fillRect(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
+            resetCanvas();
 
             document.getElementById("result").innerHTML = "";
 
             document.getElementById("confidence").innerHTML = "";
+
         }
 
 
-        // Send drawing to Flask
+        // Predict digit
         async function predictDigit() {
 
+            const resultElement = document.getElementById("result");
+            const confidenceElement = document.getElementById("confidence");
+
+            resultElement.innerHTML = "Predicting...";
+            confidenceElement.innerHTML = "";
+
+
+            // Convert canvas to PNG
             const image = canvas.toDataURL("image/png");
 
 
@@ -233,24 +239,39 @@
                 });
 
 
+                // Check whether Flask returned an error
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Server returned error: " + response.status
+                    );
+
+                }
+
+
                 const result = await response.json();
 
 
-                document.getElementById("result").innerHTML =
+                // Display prediction
+                resultElement.innerHTML =
                     "Predicted Digit: " + result.digit;
 
 
-                document.getElementById("confidence").innerHTML =
+                confidenceElement.innerHTML =
                     "Confidence: " + result.confidence + "%";
+
 
             }
 
             catch (error) {
 
-                document.getElementById("result").innerHTML =
-                    "Error connecting to server.";
+                resultElement.innerHTML =
+                    "Prediction failed.";
 
-                console.error(error);
+                confidenceElement.innerHTML =
+                    "Please try again.";
+
+                console.error("Prediction error:", error);
 
             }
 
