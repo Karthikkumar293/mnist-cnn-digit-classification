@@ -2,8 +2,9 @@
 
 A Convolutional Neural Network (CNN) project that recognizes handwritten digits from **0 to 9** using the **MNIST dataset**.
 
-The model is trained using TensorFlow/Keras and can predict a digit from a handwritten image provided by the user.
+The model is trained using TensorFlow/Keras and deployed as a web application where users can draw a handwritten digit directly on the screen and get the predicted digit with its confidence score.
 
+🚀 **Live Demo:** https://mnist-cnn-digit-classification.onrender.com
 
 ---
 
@@ -11,23 +12,22 @@ The model is trained using TensorFlow/Keras and can predict a digit from a handw
 
 Handwritten digit recognition is a common image classification problem in Machine Learning and Deep Learning.
 
-In this project, a CNN is trained on the MNIST dataset containing thousands of handwritten digit images. The trained model learns different patterns, edges, curves, and shapes from the images and uses them to classify new handwritten digits.
+In this project, a CNN is trained on the MNIST dataset. The model learns different patterns, edges, curves, and shapes from handwritten digit images and uses them to classify new digits.
 
-The final model can take a handwritten digit image as input and predict which digit it represents.
+The project also includes a Flask web application with an interactive drawing canvas. Users can draw a digit from 0 to 9 and receive the model's prediction.
 
 ### Example
 
-```text
-Handwritten Image
-       ↓
-Image Preprocessing
-       ↓
-CNN Model
-       ↓
-Prediction
-       ↓
-Digit: 7
-```
+    User Draws Digit
+           ↓
+    Image Preprocessing
+           ↓
+    CNN Model
+           ↓
+    Prediction
+           ↓
+    Digit: 7
+    Confidence: 98%
 
 ---
 
@@ -35,149 +35,123 @@ Digit: 7
 
 This project uses the **MNIST handwritten digit dataset**.
 
-The dataset contains:
-
-* **60,000** training images
-* **10,000** testing images
-* Images are **28 × 28 pixels**
-* Images are grayscale
-* There are **10 classes**, from 0 to 9
-
-Example classes:
-
-```text
-0  1  2  3  4  5
-6  7  8  9
-```
+- 60,000 training images
+- 10,000 testing images
+- Image size: 28 × 28 pixels
+- Grayscale images
+- 10 classes: 0 to 9
 
 ---
 
 ## 🛠️ Technologies Used
 
-* Python
-* TensorFlow
-* Keras
-* NumPy
-* Matplotlib
-* PIL
-* Jupyter Notebook
-* CNN
+- Python
+- TensorFlow
+- Keras
+- CNN
+- NumPy
+- Pillow
+- Flask
+- HTML
+- CSS
+- JavaScript
+- TensorFlow Lite
+- Gunicorn
+- Render
 
 ---
 
 ## 🧠 CNN Architecture
 
-The CNN used in this project contains the following layers:
+The CNN model contains:
 
-```text
-Input Image
-28 × 28 × 1
-     ↓
-Convolution Layer
-32 Filters, 3 × 3
-     ↓
-ReLU Activation
-     ↓
-Max Pooling
-2 × 2
-     ↓
-Flatten
-     ↓
-Dense Layer
-128 Neurons
-     ↓
-Output Layer
-10 Neurons
-     ↓
-Digit Prediction
-0 - 9
-```
+    Input Image
+    28 × 28 × 1
+          ↓
+    Conv2D
+    32 Filters
+    3 × 3 Kernel
+    ReLU Activation
+          ↓
+    MaxPooling2D
+    2 × 2
+          ↓
+    Flatten
+          ↓
+    Dense
+    128 Neurons
+    ReLU Activation
+          ↓
+    Dense
+    10 Neurons
+    Softmax
+          ↓
+    Predicted Digit
 
-### Layers Used
-
-#### 1. Convolution Layer
-
-The convolution layer extracts important features from the image, such as edges, lines, curves, and shapes.
-
-#### 2. Max Pooling Layer
-
-The max pooling layer reduces the size of the feature maps while keeping important information.
-
-#### 3. Flatten Layer
-
-The extracted features are converted into a one-dimensional array.
-
-#### 4. Dense Layer
-
-The dense layer learns relationships between the extracted features.
-
-#### 5. Output Layer
-
-The final layer contains 10 neurons representing digits from **0 to 9**.
-
-Softmax activation is used to obtain the probability of each digit.
+The final layer contains 10 neurons representing digits 0 to 9.
 
 ---
 
-## 🔄 Data Preprocessing
+## 🔄 How It Works
 
-The MNIST images are originally represented as:
-
-```text
-28 × 28
-```
-
-For CNN, the images are reshaped to:
-
-```text
-28 × 28 × 1
-```
-
-The `1` represents the grayscale channel.
-
-The pixel values are originally between:
-
-```text
-0 - 255
-```
-
-They are normalized to:
-
-```text
-0 - 1
-```
-
-using:
-
-```python
-X_train = X_train / 255.0
-X_test = X_test / 255.0
-```
+    User Draws Digit
+           ↓
+    HTML Canvas
+           ↓
+    JavaScript
+           ↓
+    Flask Backend
+           ↓
+    Image Preprocessing
+           ↓
+    TensorFlow Lite CNN Model
+           ↓
+    Prediction
+           ↓
+    Digit + Confidence
 
 ---
 
-## 🏋️ Model Training
+## ✍️ Web Application
 
-The model is compiled using:
+The web application allows users to draw handwritten digits directly on the screen.
 
-```python
-model.compile(
-    optimizer='adam',
-    loss='sparse_categorical_crossentropy',
-    metrics=['accuracy']
-)
-```
+### Features
 
-The model is then trained using the MNIST training data.
+- Draw handwritten digits
+- Clear the canvas
+- Predict the digit
+- Display prediction confidence
+- Interactive web interface
+- CNN-based classification
+- TensorFlow Lite deployment
+  
 
-```python
-model.fit(
-    X_train,
-    Y_train,
-    validation_data=(X_test, Y_test),
-    epochs=8
-)
-```
+---
+
+## 🖼️ Image Preprocessing
+
+The user's drawing is processed before being sent to the CNN model.
+
+    User Drawing
+          ↓
+    Convert to Grayscale
+          ↓
+    Find Digit Area
+          ↓
+    Crop Digit
+          ↓
+    Resize Digit
+          ↓
+    Center Digit
+          ↓
+    Convert to 28 × 28
+          ↓
+    Normalize Pixel Values
+          ↓
+    CNN Model
+
+This preprocessing helps make the user's drawing more similar to the MNIST images used during training.
 
 ---
 
@@ -185,71 +159,42 @@ model.fit(
 
 The CNN achieved approximately:
 
-* **Training Accuracy:** 99.76%
-* **Best Validation Accuracy:** 98.61%
+- Training Accuracy: **99%+**
+- Validation/Test Accuracy: **98%+**
 
-These results show that the CNN is able to recognize handwritten digits with high accuracy.
-
----
-
-## 🔮 Prediction
-
-After training, the model can predict a handwritten digit using:
-
-```python
-prediction = model.predict(image)
-predicted_digit = np.argmax(prediction)
-
-print("Predicted digit:", predicted_digit)
-```
-
-For example:
-
-```text
-Predicted digit: 7
-```
-
----
-
-## 🖼️ User Image Prediction
-
-The project can also accept a handwritten digit image from the user.
-
-The uploaded image is processed before prediction:
-
-```text
-User Image
-    ↓
-Convert to Grayscale
-    ↓
-Resize to 28 × 28
-    ↓
-Normalize Pixel Values
-    ↓
-Reshape for CNN
-    ↓
-Model Prediction
-    ↓
-Predicted Digit
-```
-
-This allows the trained CNN to recognize a handwritten digit supplied by the user.
+The model was tested using the MNIST test dataset before deployment.
 
 ---
 
 ## 📁 Project Structure
 
-```text
-mnist-cnn-digit-classification/
-│
-├── notebook.ipynb
-├── mnist_cnn.keras
-├── app.py
-├── requirements.txt
-└── README.md
-```
+    mnist-cnn-digit-classification/
+    │
+    ├── app.py
+    ├── mnist_cnn.keras
+    ├── mnist_cnn.tflite
+    ├── MNIST_ handwritting_CNN.ipynb
+    ├── README.md
+    ├── requirements.txt
+    ├── .python-version
+    │
+    └── templates/
+        └── index.html
 
-> File names can be changed according to the actual files in the project.
+---
+
+## 📄 File Description
+
+| File | Description |
+|------|-------------|
+| `app.py` | Flask backend for image processing and prediction |
+| `mnist_cnn.keras` | Original trained CNN model |
+| `mnist_cnn.tflite` | Lightweight TensorFlow Lite model used for deployment |
+| `MNIST_ handwritting_CNN.ipynb` | Jupyter Notebook containing model training and testing |
+| `templates/index.html` | Web interface and drawing canvas |
+| `requirements.txt` | Required Python libraries |
+| `.python-version` | Python version used for deployment |
+| `README.md` | Project documentation |
 
 ---
 
@@ -257,98 +202,89 @@ mnist-cnn-digit-classification/
 
 Clone the repository:
 
-```bash
-git clone https://github.com/your-username/mnist-cnn-digit-classification.git
-```
+    git clone https://github.com/Karthikkumar293/mnist-cnn-digit-classification.git
 
-Move into the project directory:
+Go to the project directory:
 
-```bash
-cd mnist-cnn-digit-classification
-```
+    cd mnist-cnn-digit-classification
 
 Install the required libraries:
 
-```bash
-pip install -r requirements.txt
-```
+    pip install -r requirements.txt
 
 ---
 
-## 📦 Requirements
+## ▶️ Run Locally
 
-Example `requirements.txt`:
+Run the Flask application:
 
-```text
-tensorflow
-numpy
-matplotlib
-pillow
-flask
-gunicorn
-```
+    python app.py
 
----
+Then open your browser and visit:
 
-## 🚀 Future Improvements
+    http://127.0.0.1:5000
 
-Some possible improvements for this project are:
-
-* Create a web interface for digit recognition
-* Allow users to draw digits directly on the screen
-* Improve preprocessing for real-world handwritten images
-* Deploy the model online
-* Add prediction confidence
-* Improve the CNN architecture
-* Add support for larger and more varied handwritten images
+Draw a digit and click the **Predict** button.
 
 ---
 
-## 🎯 Applications
+## 🌐 Deployment
 
-Handwritten digit recognition can be used in:
+The application is deployed using **Render**.
 
-* Digit recognition systems
-* Form processing
-* Postal code recognition
-* Bank cheque processing
-* Automatic document processing
-* Educational applications
-* Optical Character Recognition (OCR)
+### Live Demo
+
+https://mnist-cnn-digit-classification.onrender.com
+
+The deployed application uses the TensorFlow Lite model to reduce memory usage and make deployment easier on a free server.
+
+> Note: The free Render instance may take some time to respond after a period of inactivity.
 
 ---
 
-## 📚 Conclusion
+## 🎯 Future Improvements
 
-This project demonstrates how a **Convolutional Neural Network** can be used for handwritten digit classification.
+- Improve prediction accuracy for user-drawn digits
+- Add image upload functionality
+- Add prediction history
+- Improve the drawing experience
+- Add better mobile touch support
+- Display probabilities for all 10 digits
+- Improve image preprocessing
+- Add more handwritten datasets
 
-The CNN learns features from the MNIST dataset and classifies handwritten images into one of ten categories, from **0 to 9**.
+---
 
-The project also demonstrates the complete machine learning workflow:
+## 📚 Learning Outcomes
 
-```text
-Dataset
-   ↓
-Preprocessing
-   ↓
-CNN Model
-   ↓
-Training
-   ↓
-Evaluation
-   ↓
-Prediction
-   ↓
-Deployment
-```
+Through this project, I learned:
+
+- MNIST dataset and image classification
+- Image preprocessing
+- CNN architecture
+- Convolution and pooling
+- Model training and evaluation
+- Model prediction
+- TensorFlow Lite conversion
+- Flask API development
+- HTML Canvas and JavaScript
+- Connecting frontend with a machine learning model
+- Deploying a machine learning application using Render
 
 ---
 
 ## 👨‍💻 Author
 
-**A Karthik Kumar**
+**Karthik Kumar**
 
-### Project
+GitHub: https://github.com/Karthikkumar293
 
-**MNIST Handwritten Digit Classification using CNN**
+---
 
+## ⭐ Support
+
+If you found this project useful, consider giving the repository a ⭐ on GitHub.
+
+---
+
+**Built with Python, TensorFlow, CNN, Flask and JavaScript.**
