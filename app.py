@@ -14,7 +14,7 @@ model = tf.keras.models.load_model("mnist_cnn.keras")
 
 @app.route("/")
 def home():
-    return render_template("karthik.html")
+    return render_template("index.html")
 
 
 @app.route("/predict", methods=["POST"])
