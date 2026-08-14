@@ -25,9 +25,9 @@
         .container {
             width: 90%;
             max-width: 600px;
-            margin: 40px auto;
+            margin: 50px auto;
             background: white;
-            padding: 25px;
+            padding: 30px;
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
         }
@@ -42,16 +42,13 @@
 
         canvas {
             display: block;
-            width: 280px;
-            height: 280px;
-            max-width: 100%;
             margin: 25px auto;
             background: black;
             border: 3px solid #333;
             border-radius: 8px;
             cursor: crosshair;
 
-            /* Important for phone touch drawing */
+            /* Allows drawing with finger on phone */
             touch-action: none;
         }
 
@@ -80,7 +77,7 @@
 
         #result {
             margin-top: 25px;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
         }
 
@@ -130,7 +127,6 @@
 
     <script>
 
-        // Get canvas
         const canvas =
             document.getElementById("canvas");
 
@@ -141,24 +137,17 @@
 
 
         // -------------------------
-        // Reset canvas
+        // Create black background
         // -------------------------
 
-        function resetCanvas() {
+        ctx.fillStyle = "black";
 
-            ctx.fillStyle = "black";
-
-            ctx.fillRect(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-        }
-
-
-        // Create black canvas
-        resetCanvas();
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
 
 
         // -------------------------
@@ -167,7 +156,7 @@
 
         ctx.strokeStyle = "white";
 
-        ctx.lineWidth = 25;
+        ctx.lineWidth = 20;
 
         ctx.lineCap = "round";
 
@@ -175,7 +164,8 @@
 
 
         // -------------------------
-        // Get correct position
+        // Get drawing position
+        // Works on laptop and phone
         // -------------------------
 
         function getPosition(event) {
@@ -190,7 +180,6 @@
                 canvas.height / rect.height;
 
             return {
-
                 x:
                     (event.clientX - rect.left)
                     * scaleX,
@@ -204,35 +193,34 @@
 
         // -------------------------
         // Start drawing
-        // Works on:
-        // Mouse
-        // Android
-        // iPhone
         // -------------------------
 
         canvas.addEventListener(
             "pointerdown",
-            function(event) {
-
-                event.preventDefault();
-
-                drawing = true;
-
-                canvas.setPointerCapture(
-                    event.pointerId
-                );
-
-                const position =
-                    getPosition(event);
-
-                ctx.beginPath();
-
-                ctx.moveTo(
-                    position.x,
-                    position.y
-                );
-            }
+            startDrawing
         );
+
+
+        function startDrawing(event) {
+
+            event.preventDefault();
+
+            drawing = true;
+
+            canvas.setPointerCapture(
+                event.pointerId
+            );
+
+            const position =
+                getPosition(event);
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                position.x,
+                position.y
+            );
+        }
 
 
         // -------------------------
@@ -241,30 +229,44 @@
 
         canvas.addEventListener(
             "pointermove",
-            function(event) {
-
-                event.preventDefault();
-
-                if (!drawing) {
-                    return;
-                }
-
-                const position =
-                    getPosition(event);
-
-                ctx.lineTo(
-                    position.x,
-                    position.y
-                );
-
-                ctx.stroke();
-            }
+            draw
         );
+
+
+        function draw(event) {
+
+            event.preventDefault();
+
+            if (!drawing) {
+                return;
+            }
+
+            const position =
+                getPosition(event);
+
+            ctx.lineTo(
+                position.x,
+                position.y
+            );
+
+            ctx.stroke();
+        }
 
 
         // -------------------------
         // Stop drawing
         // -------------------------
+
+        canvas.addEventListener(
+            "pointerup",
+            stopDrawing
+        );
+
+        canvas.addEventListener(
+            "pointercancel",
+            stopDrawing
+        );
+
 
         function stopDrawing(event) {
 
@@ -276,31 +278,20 @@
         }
 
 
-        canvas.addEventListener(
-            "pointerup",
-            stopDrawing
-        );
-
-
-        canvas.addEventListener(
-            "pointercancel",
-            stopDrawing
-        );
-
-
-        canvas.addEventListener(
-            "pointerleave",
-            stopDrawing
-        );
-
-
         // -------------------------
-        // Clear button
+        // Clear canvas
         // -------------------------
 
         function clearCanvas() {
 
-            resetCanvas();
+            ctx.fillStyle = "black";
+
+            ctx.fillRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
 
             document.getElementById(
                 "result"
@@ -317,6 +308,12 @@
         // -------------------------
 
         async function predictDigit() {
+
+            const image =
+                canvas.toDataURL(
+                    "image/png"
+                );
+
 
             const result =
                 document.getElementById(
@@ -335,16 +332,8 @@
             confidence.innerHTML = "";
 
 
-            // Convert drawing to image
-            const image =
-                canvas.toDataURL(
-                    "image/png"
-                );
-
-
             try {
 
-                // Send image to Flask
                 const response =
                     await fetch(
                         "/predict",
@@ -363,7 +352,6 @@
                     );
 
 
-                // Check server response
                 if (!response.ok) {
 
                     throw new Error(
@@ -373,12 +361,10 @@
                 }
 
 
-                // Convert response to JSON
                 const data =
                     await response.json();
 
 
-                // Check backend error
                 if (data.error) {
 
                     throw new Error(
@@ -387,17 +373,16 @@
                 }
 
 
-                // Display prediction
                 result.innerHTML =
                     "Predicted Digit: " +
                     data.digit;
 
 
-                // Display confidence
                 confidence.innerHTML =
                     "Confidence: " +
                     data.confidence +
                     "%";
+
 
             }
 
@@ -410,11 +395,11 @@
 
 
                 result.innerHTML =
-                    "Prediction failed";
+                    "Error connecting to server.";
 
 
                 confidence.innerHTML =
-                    error.message;
+                    "";
             }
         }
 
