@@ -4,9 +4,6 @@ A Convolutional Neural Network (CNN) project that recognizes handwritten digits 
 
 The model is trained using TensorFlow/Keras and can predict a digit from a handwritten image provided by the user.
 
-## 👨‍💻 Author
-
-**A Karthik Kumar**
 
 ---
 
@@ -355,6 +352,3 @@ Deployment
 
 **MNIST Handwritten Digit Classification using CNN**
 
-### Repository Name
-
-`mnist-cnn-digit-classification`
